@@ -65,7 +65,7 @@ private:
     std::string model_path_lightglue, model_path_superpoint;
     std::shared_ptr<SuperPoint> model_superpoint;
     std::shared_ptr<RKNNModel_> model_lightglue;
-    int point_num, RUN_number;
+    int point_num, RUN_number,loss_number;
     cv::Ptr<cv::DescriptorMatcher> matcher;
     cv::Point2f aim_point, aim_point_detect;
 
@@ -73,9 +73,11 @@ private:
     cv::Mat _update_frame, _satellite;
     std::atomic_bool ONLY_SP;
     std::atomic_int system_state;//  0 static,1 run;
+    std::atomic_int HIT_state;//  0 static,1 run;
     std::atomic_int _async_flag; //  0,1,2 LIKE none, run, hit,
     int inference_w;
     int inference_h;
+
 
 
 public:
@@ -86,7 +88,7 @@ public:
 
     std::pair<cv::Mat, bool> superPoint_inference(cv::Mat img0, cv::Mat img1);
 
-    void async(cv::Mat frame, cv::Mat satellite, cv::Point aim_point, bool ONLY_SP);
+    void async(cv::Mat frame, cv::Mat satellite, cv::Point aim_point, bool ONLY_SP = false);
 
     cv::Point syncronize(); //   return cv::Mat H = findHomography(pts0, pts1, cv::RANSAC);
 

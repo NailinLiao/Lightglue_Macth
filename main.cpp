@@ -36,11 +36,11 @@ cv::Mat pasteScaledImage(cv::Mat src, cv::Mat dst) {
 
 int main() {
     cv::VideoCapture cap("../resource/test.mp4"); // 替换为你的视频文件路径
-    cv::Mat Mat_satellite = cv::imread("../resource/ref.jpg");
-    // 使用示例：
-    double rotationAngle = 120.0; // 你想要旋转的角度
-    cv::Mat rotatedImg = rotateImage(Mat_satellite, rotationAngle,
-                                     cv::Point2f(Mat_satellite.cols / 2.0, Mat_satellite.rows / 2.0));
+    cv::Mat Mat_satellite = cv::imread("../resource/ref.jpeg");
+//     使用示例：
+//    double rotationAngle = 120.0; // 你想要旋转的角度
+//    cv::Mat rotatedImg = rotateImage(Mat_satellite, rotationAngle,
+//                                     cv::Point2f(Mat_satellite.cols / 2.0, Mat_satellite.rows / 2.0));
 
 
     if (!cap.isOpened()) {
@@ -61,8 +61,8 @@ int main() {
 
     cv::Mat frame;
     cv::Mat old_frame;
-    cap >> old_frame; // 读取第一帧
-//    old_frame = rotatedImg.clone();
+//    cap >> old_frame; // 读取第一帧
+    old_frame = Mat_satellite.clone();
     cv::Point aim_point = cv::Point(960, 540);
     int radius = 5; // 圆的半径
     cv::Scalar color(0, 255, 255); // 蓝色圆圈 (BGR)
@@ -78,7 +78,7 @@ int main() {
 
         i++;
 
-        if (i % 10 == 0) {
+        if (i % 5 == 0) {
             int matchPtr_statu = lightglueMatch.get_statu();
 
             if (matchPtr_statu != 1) {
@@ -103,6 +103,17 @@ int main() {
                 cv::circle(frame, aim_point,
                            radius, color,
                            thickness);
+                // 绘制全画面十字线
+                int line_thickness = 2; // 线条粗细
+
+                // 绘制水平线
+                cv::line(frame, cv::Point(0, aim_point.y), cv::Point(frame.cols - 1, aim_point.y),
+                         cv::Scalar(0, 255, 255), line_thickness);
+
+                // 绘制垂直线
+                cv::line(frame, cv::Point(aim_point.x, 0), cv::Point(aim_point.x, frame.rows - 1),
+                         cv::Scalar(0, 255, 255), line_thickness);
+
             } else if (matchPtr_statu == 0) {
                 std::cout << "Frame :" << i << " Map NULL" << std::endl;
             }

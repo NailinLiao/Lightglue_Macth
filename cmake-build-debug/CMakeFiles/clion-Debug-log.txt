@@ -1,4 +1,4 @@
-/usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S /tmp/tmp.xxoKsCSekB -B /tmp/tmp.xxoKsCSekB/cmake-build-debug
+/usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S /tmp/tmp.vWtDdVJsjc -B /tmp/tmp.vWtDdVJsjc/cmake-build-debug
 -- The C compiler identification is GNU 10.2.1
 -- The CXX compiler identification is GNU 10.2.1
 -- Detecting C compiler ABI info
@@ -14,4 +14,4 @@
 -- Found OpenCV: /usr (found version "4.5.1") found components: core highgui imgproc features2d videoio imgcodecs calib3d 
 -- Configuring done
 -- Generating done
--- Build files have been written to: /tmp/tmp.xxoKsCSekB/cmake-build-debug
+-- Build files have been written to: /tmp/tmp.vWtDdVJsjc/cmake-build-debug
