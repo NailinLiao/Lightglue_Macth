@@ -323,7 +323,7 @@ LightglueMatch::LightglueMatch(std::string model_superpoint_path, std::string mo
     point_num = 256;
     RUN_number = 0;
     loss_number = 0;
-
+    accumulate_H = cv::Mat::eye(3, 3, CV_64F);
     inference_w = 960;
     inference_h = 544;
 
@@ -335,7 +335,7 @@ LightglueMatch::LightglueMatch(std::string model_superpoint_path, std::string mo
 void LightglueMatch::work_loop() {
     while (true) {
 
-        if (system_state.load() != 1) {
+        if (system_state.load() == 0) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         } else {
 
@@ -347,11 +347,11 @@ void LightglueMatch::work_loop() {
 
             if (ONLY_SP) {
 //                resize 相关工作
-                float resize_rate_w_satellite = _satellite.cols / 960;
-                float resize_rate_h_satellite = _satellite.rows / 544;
+                float resize_rate_w_satellite = float(_satellite.cols) / 960;
+                float resize_rate_h_satellite = float(_satellite.rows) / 544;
 
-                float resize_rate_w_update_frame = _update_frame.cols / 960;
-                float resize_rate_h_update_frame = _update_frame.rows / 544;
+                float resize_rate_w_update_frame = float(_update_frame.cols) / 960;
+                float resize_rate_h_update_frame = float(_update_frame.cols) / 544;
 
 //               需要把输入的敌点也resize 关于 卫星图的输入 所以需要使用卫星图的尺寸；
                 aim_point.x = aim_point.x / resize_rate_w_satellite;
@@ -368,8 +368,9 @@ void LightglueMatch::work_loop() {
                     //预测点
                     std::vector<cv::Point2f> _srcPoints(1, aim_point);
                     std::vector<cv::Point2f> _dstPoints;
+                    accumulate_H = pai_SP.first.clone();
+
                     cv::perspectiveTransform(_srcPoints, _dstPoints, pai_SP.first);//转换到 弹 的视角
-//
                     aim_point_detect.x = _dstPoints[0].x * resize_rate_w_update_frame;//弹敌点缩放
                     aim_point_detect.y = _dstPoints[0].y * resize_rate_h_update_frame;
                     _async_flag.store(2);
@@ -382,44 +383,79 @@ void LightglueMatch::work_loop() {
                 system_state.store(0);
             } else {
                 float crop_cent_x, h_rate, crop_cent_y;
-                if (HIT_state.load() == 1) {
+                std::pair<cv::Mat, bool> pai_LG;
+                int stap = 0;
+                if (false) {
+//                if (HIT_state.load() == 1) {
+                    stap = 1;
                     crop_cent_x = aim_point_detect.x;
                     crop_cent_y = aim_point_detect.y;
-                    std::cout << "匹配命中切图 crop_cent_y:" << crop_cent_y << std::endl;
+
+                    std::pair<cv::Mat, cv::Point2f> crop_update_frame = crop_and_pad_image(GRAY_frame,
+                                                                                           int(crop_cent_x),
+                                                                                           crop_cent_y,
+                                                                                           inference_w, inference_h);
+
+                    std::pair<cv::Mat, cv::Point2f> crop_satellite = crop_and_pad_image(GRAY_satellite, aim_point.x,
+                                                                                        aim_point.y,
+                                                                                        inference_w, inference_h);
+
+                    cv::Mat img1, img2; // 假设有三张要显示的图片
+
+                    pai_LG = lightGlue_inference(crop_satellite.first, crop_update_frame.first,
+                                                 crop_satellite.second, crop_update_frame.second);
+
+
                 } else {
-                    crop_cent_x = GRAY_frame.cols / 2;
 
-                    h_rate = GRAY_frame.rows / 2;//此处为滑动起点 可变
+                    stap = 2;
+                    float resize_rate_w_satellite = float(_satellite.cols) / 960;
+                    float resize_rate_h_satellite = float(_satellite.rows) / 544;
 
-                    crop_cent_y = (RUN_number % 2) * h_rate + 272;
-                    std::cout << "搜索模式切图 crop_cent_y:" << crop_cent_y << std::endl;
+
+                    float resize_rate_w_update_frame = float(_update_frame.cols) / 960;
+                    float resize_rate_h_update_frame = float(_update_frame.rows) / 544;
+
+
+                    cv::Mat resize_frame_GRAY, resize_satellite_GRAY;
+                    cv::resize(GRAY_frame, resize_frame_GRAY,
+                               cv::Size(inference_w, inference_h));
+
+                    cv::resize(GRAY_satellite, resize_satellite_GRAY,
+                               cv::Size(inference_w, inference_h));
+
+
+                    pai_LG = lightGlue_inference(resize_satellite_GRAY, resize_frame_GRAY,
+                                                 cv::Point2f(resize_rate_w_satellite, resize_rate_h_satellite),
+                                                 cv::Point2f(resize_rate_w_update_frame, resize_rate_h_update_frame),
+                                                 true);
+
                 }
 
-                std::pair<cv::Mat, cv::Point2f> crop_update_frame = crop_and_pad_image(GRAY_frame,
-                                                                                       int(crop_cent_x),
-                                                                                       crop_cent_y,
-                                                                                       inference_w, inference_h);
-
-                std::pair<cv::Mat, cv::Point2f> crop_satellite = crop_and_pad_image(GRAY_satellite, aim_point.x,
-                                                                                    aim_point.y,
-                                                                                    inference_w, inference_h);
-
-                std::pair<cv::Mat, bool> pai_LG = lightGlue_inference(crop_satellite.first, crop_update_frame.first,
-                                                                      crop_satellite.second, crop_update_frame.second);
-
-
-                if (pai_LG.second) //标记运行结果
+                if (pai_LG.second == true) //标记运行结果
                 {
-                    //预测点
-                    std::vector<cv::Point2f> _srcPoints(1, aim_point);
-                    std::vector<cv::Point2f> _dstPoints;
-                    cv::perspectiveTransform(_srcPoints, _dstPoints, pai_LG.first);
+                    if (stap == 1) {
+                        //预测点
+                        std::vector<cv::Point2f> _srcPoints(1, aim_point);
+                        std::vector<cv::Point2f> _dstPoints;
+                        accumulate_H = pai_LG.first.clone();
+                        cv::perspectiveTransform(_srcPoints, _dstPoints, pai_LG.first);
+                        aim_point_detect.x = _dstPoints[0].x;
+                        aim_point_detect.y = _dstPoints[0].y;
 
-                    aim_point_detect.x = _dstPoints[0].x;
-                    aim_point_detect.y = _dstPoints[0].y;
+                    } else if (stap == 2) {
+                        std::vector<cv::Point2f> _srcPoints(1, aim_point);
+                        std::vector<cv::Point2f> _dstPoints;
+                        accumulate_H = pai_LG.first.clone();
+
+                        cv::perspectiveTransform(_srcPoints, _dstPoints, pai_LG.first);//转换到 弹 的视角
+
+                        aim_point_detect.x = _dstPoints[0].x;//弹敌点缩放
+                        aim_point_detect.y = _dstPoints[0].y;
+                    }
+                    loss_number = 0;
                     _async_flag.store(2);
                     HIT_state.store(1);
-                    loss_number = 0;
 
                 } else {
                     _async_flag.store(0);
@@ -441,9 +477,6 @@ void LightglueMatch::async(cv::Mat satellite, cv::Mat frame, cv::Point _aim_poin
     _async_flag.store(1);   //标记系统正在运行
     system_state.store(1);
 
-    if (loss_number % 5 == 0) {
-        HIT_state.store(0); //丢失五次进入搜索模式；搜索模式 corp区域将上下滑动；
-    }
 
 }
 
@@ -451,13 +484,16 @@ int LightglueMatch::get_statu() {
     return _async_flag.load();
 }
 
-cv::Point LightglueMatch::syncronize() {
-    return aim_point_detect;
+
+std::pair<cv::Mat, cv::Point> LightglueMatch::syncronize() {
+
+    return std::make_pair(accumulate_H, aim_point_detect);
+
 }
 
 std::pair<cv::Mat, bool>
 LightglueMatch::lightGlue_inference(cv::Mat img0, cv::Mat img1, cv::Point2f img0_cut_point,
-                                    cv::Point2f img1_cut_point) {
+                                    cv::Point2f img1_cut_point, bool rate) {
 
     float max_indice_x[point_num], max_indice_y[point_num];
     int indice_x[point_num], indice_y[point_num];
@@ -475,17 +511,36 @@ LightglueMatch::lightGlue_inference(cv::Mat img0, cv::Mat img1, cv::Point2f img0
     }
 
     if (img0_cut_point.x != 0) {
-        for (cv::KeyPoint &kp: keypoint0) {
-            kp.pt.x += img0_cut_point.x;
-            kp.pt.y += img0_cut_point.y;
+        if (rate) {
+
+            for (cv::KeyPoint &kp: keypoint0) {
+                kp.pt.x *= img0_cut_point.x;
+                kp.pt.y *= img0_cut_point.y;
+
+            }
+        } else {
+            for (cv::KeyPoint &kp: keypoint0) {
+                kp.pt.x += img0_cut_point.x;
+                kp.pt.y += img0_cut_point.y;
+            }
         }
+
     }
 
     if (img1_cut_point.x != 0) {
-        for (cv::KeyPoint &kp: keypoint1) {
-            kp.pt.x += img1_cut_point.x;
-            kp.pt.y += img1_cut_point.y;
+        if (rate) {
+
+            for (cv::KeyPoint &kp: keypoint1) {
+                kp.pt.x *= img1_cut_point.x;
+                kp.pt.y *= img1_cut_point.y;
+            }
+        } else {
+            for (cv::KeyPoint &kp: keypoint1) {
+                kp.pt.x += img1_cut_point.x;
+                kp.pt.y += img1_cut_point.y;
+            }
         }
+
     }
 
 
@@ -594,14 +649,6 @@ LightglueMatch::lightGlue_inference(cv::Mat img0, cv::Mat img1, cv::Point2f img0
     cv::Mat H, mask;
     H = cv::findHomography(pts0, pts1, cv::RANSAC, 3.0, mask);
 
-//#ifdef MATCH_DEBUG
-//    cv::Mat img_matches;
-//    cv::drawMatches(img0, keypoint0, img1, keypoint1, good_matches, img_matches, cv::Scalar::all(-1),
-//                    cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
-//    cv::imshow("LG_matches", img_matches);
-//    cv::waitKey(100);
-//
-//#endif
     return std::make_pair(H, true);
 }
 
@@ -640,15 +687,6 @@ std::pair<cv::Mat, bool> LightglueMatch::superPoint_inference(cv::Mat img0, cv::
 
     cv::Mat H, mask;
     H = cv::findHomography(pts0, pts1, cv::RANSAC, 3.0, mask);
-
-//#ifdef MATCH_DEBUG
-//    cv::Mat img_matches;
-//    cv::drawMatches(img0, keypoint0, img1, keypoint1, knn_matches, img_matches, cv::Scalar::all(-1),
-//                    cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
-//    cv::imshow("SP_matches", img_matches);
-//    cv::waitKey(100);
-//
-//#endif
 
 
     int matchedPointsCount = cv::countNonZero(mask);

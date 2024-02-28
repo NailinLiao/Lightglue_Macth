@@ -93,12 +93,12 @@ clean: CMakeFiles/lightglue_Macth.dir/clean
 CMakeFiles/lightglue_Macth.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/tmp/tmp.vWtDdVJsjc/cmake-build-debug/CMakeFiles --progress-num=1,2,3 "Built target lightglue_Macth"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/tmp/tmp.vWtDdVJsjc/cmake-build-debug/CMakeFiles --progress-num=1,2,3,4 "Built target lightglue_Macth"
 .PHONY : CMakeFiles/lightglue_Macth.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/lightglue_Macth.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /tmp/tmp.vWtDdVJsjc/cmake-build-debug/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /tmp/tmp.vWtDdVJsjc/cmake-build-debug/CMakeFiles 4
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/lightglue_Macth.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /tmp/tmp.vWtDdVJsjc/cmake-build-debug/CMakeFiles 0
 .PHONY : CMakeFiles/lightglue_Macth.dir/rule

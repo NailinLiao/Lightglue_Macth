@@ -196,6 +196,33 @@ src/LightglueMatch.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/src/LightglueMatch.cpp.s
 .PHONY : src/LightglueMatch.cpp.s
 
+src/ORB_WORKER.o: src/ORB_WORKER.cpp.o
+
+.PHONY : src/ORB_WORKER.o
+
+# target to build an object file
+src/ORB_WORKER.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/src/ORB_WORKER.cpp.o
+.PHONY : src/ORB_WORKER.cpp.o
+
+src/ORB_WORKER.i: src/ORB_WORKER.cpp.i
+
+.PHONY : src/ORB_WORKER.i
+
+# target to preprocess a source file
+src/ORB_WORKER.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/src/ORB_WORKER.cpp.i
+.PHONY : src/ORB_WORKER.cpp.i
+
+src/ORB_WORKER.s: src/ORB_WORKER.cpp.s
+
+.PHONY : src/ORB_WORKER.s
+
+# target to generate assembly for a file
+src/ORB_WORKER.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/src/ORB_WORKER.cpp.s
+.PHONY : src/ORB_WORKER.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -211,6 +238,9 @@ help:
 	@echo "... src/LightglueMatch.o"
 	@echo "... src/LightglueMatch.i"
 	@echo "... src/LightglueMatch.s"
+	@echo "... src/ORB_WORKER.o"
+	@echo "... src/ORB_WORKER.i"
+	@echo "... src/ORB_WORKER.s"
 .PHONY : help
 
 

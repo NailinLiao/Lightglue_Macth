@@ -1,6 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/lightglue_Macth.dir/main.cpp.o"
   "CMakeFiles/lightglue_Macth.dir/src/LightglueMatch.cpp.o"
+  "CMakeFiles/lightglue_Macth.dir/src/ORB_WORKER.cpp.o"
   "lightglue_Macth"
   "lightglue_Macth.pdb"
 )

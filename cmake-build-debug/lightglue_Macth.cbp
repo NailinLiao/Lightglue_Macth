@@ -135,10 +135,16 @@
 		<Unit filename="/tmp/tmp.vWtDdVJsjc/include/LightglueMatch.h">
 			<Option target="lightglue_Macth"/>
 		</Unit>
+		<Unit filename="/tmp/tmp.vWtDdVJsjc/include/ORB_WORKER.h">
+			<Option target="lightglue_Macth"/>
+		</Unit>
 		<Unit filename="/tmp/tmp.vWtDdVJsjc/main.cpp">
 			<Option target="lightglue_Macth"/>
 		</Unit>
 		<Unit filename="/tmp/tmp.vWtDdVJsjc/src/LightglueMatch.cpp">
+			<Option target="lightglue_Macth"/>
+		</Unit>
+		<Unit filename="/tmp/tmp.vWtDdVJsjc/src/ORB_WORKER.cpp">
 			<Option target="lightglue_Macth"/>
 		</Unit>
 		<Unit filename="/tmp/tmp.vWtDdVJsjc/CMakeLists.txt">

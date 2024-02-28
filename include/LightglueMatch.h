@@ -62,10 +62,12 @@ public:
     LightglueMatch(std::string model_superpoint_path, std::string model_lightglue_path, int point);
 
 private:
+    cv::Mat accumulate_H;
+
     std::string model_path_lightglue, model_path_superpoint;
     std::shared_ptr<SuperPoint> model_superpoint;
     std::shared_ptr<RKNNModel_> model_lightglue;
-    int point_num, RUN_number,loss_number;
+    int point_num, RUN_number, loss_number;
     cv::Ptr<cv::DescriptorMatcher> matcher;
     cv::Point2f aim_point, aim_point_detect;
 
@@ -79,18 +81,17 @@ private:
     int inference_h;
 
 
-
 public:
 
     std::pair<cv::Mat, bool>
     lightGlue_inference(cv::Mat img0, cv::Mat img1, cv::Point2f img0_cut_point = cv::Point2f(0, 0),
-                        cv::Point2f img1_cut_point = cv::Point2f(0, 0));
+                        cv::Point2f img1_cut_point = cv::Point2f(0, 0), bool rate = false);
 
     std::pair<cv::Mat, bool> superPoint_inference(cv::Mat img0, cv::Mat img1);
 
     void async(cv::Mat frame, cv::Mat satellite, cv::Point aim_point, bool ONLY_SP = false);
 
-    cv::Point syncronize(); //   return cv::Mat H = findHomography(pts0, pts1, cv::RANSAC);
+    std::pair<cv::Mat, cv::Point> syncronize(); //   return cv::Mat H = findHomography(pts0, pts1, cv::RANSAC);
 
     int get_statu();  //   return 0,1,2 LIKE none, run, end,
     void work_loop();  //   while 1 run in run_flag==true
