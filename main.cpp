@@ -118,7 +118,7 @@ int main() {
                radius, color,
                thickness);
 
-    LightglueMatch lightglueMatch("../resource/superpoint.rknn", "../resource/lightglue_3layers.rknn", 256);
+    LightglueMatch lightglueMatch("../resource/superpoint.rknn", "../resource/lightglue_3layers.rknn", 1024);
     int i = 0;
     ORB_WORKER oRB_WORKER = ORB_WORKER(0.2, 1920, 1080);
 
@@ -135,6 +135,8 @@ int main() {
             if (matchPtr_statu != 1) {
                 std::cout << "Frame :" << i << " async STAY " << std::endl;
                 lightglueMatch.async(old_frame, frame, aim_point, false);
+                oRB_WORKER.reset_H();
+
             }
 
             matchPtr_statu = lightglueMatch.get_statu();
@@ -145,78 +147,39 @@ int main() {
             }
 
             if (matchPtr_statu == 2) {
+                std::cout << "Frame :" << i << " HIT" << std::endl;
 
                 std::pair<cv::Mat, cv::Point> _ret = lightglueMatch.syncronize();
-                //                  获取lightglueMatcher矩阵H
-                //                  应用END_H 矩阵到卫星图
 
-                bool H_hit = true;
-                for (int i = 0; i < 4; ++i) {
+                cv::Mat imgWarped;
+                cv::warpPerspective(old_frame, imgWarped, _ret.first, old_frame.size());
 
-                    std::vector<cv::Point2f> _srcPoints(1, points[i]);
-                    std::vector<cv::Point2f> _dstPoints;
-                    cv::Point2f new_point;
-                    cv::perspectiveTransform(_srcPoints, _dstPoints, _ret.first);//转换到 弹 的视角
-                    new_point.x = _dstPoints[0].x;
-                    new_point.y = _dstPoints[0].y;
-                    double distAB = calculateDistance(points[i], new_point);
-                    std::cout << "points[i] distAB: " << distAB << std::endl;
+                aim_point = _ret.second;
 
+                cv::Mat ORB_H = oRB_WORKER.get_H();
+                cv::Mat imgWarped_ORB;
 
-                    if (distAB > 500) {
-                        H_hit = false;
-                    }
-                }
+//
+//                cv::warpPerspective(imgWarped, imgWarped_ORB, ORB_H, old_frame.size());
+//                std::cout << "oRB_WORKER.warpPerspective" << std::endl;
+//                old_frame = imgWarped_ORB.clone();
+//                aim_point = oRB_WORKER.get_ORB_swap(aim_point);
 
-                double det = cv::determinant(_ret.first);
-                cv::SVD svd(_ret.first);
-                double maxSingularValue = *std::max_element(svd.w.begin<double>(), svd.w.end<double>());
-                double minSingularValue = *std::min_element(svd.w.begin<double>(), svd.w.end<double>());
-                double conditionNumber = maxSingularValue / minSingularValue;
-                std::cout << "Determinant: " << det << std::endl;
-                std::cout << "Condition Number: " << conditionNumber << std::endl;
+                cv::Scalar color(0, 255, 255); // 蓝色圆圈 (BGR)
 
-                if (H_hit) {
-                    std::cout << "H_hit " << std::endl;
+                // 绘制全画面十字线
+                int line_thickness = 2; // 线条粗细
 
-                    cv::Mat imgWarped;
-                    cv::warpPerspective(old_frame, imgWarped, _ret.first, old_frame.size());
-//                    添加ORB逻辑
-                    aim_point = _ret.second;
+                // 绘制水平线
+                cv::line(frame, cv::Point(0, aim_point.y), cv::Point(frame.cols - 1, aim_point.y),
+                         cv::Scalar(0, 255, 255), line_thickness);
 
-                    cv::Mat ORB_H = oRB_WORKER.get_H();
-                    cv::Mat imgWarped_ORB;
-
-                    cv::warpPerspective(imgWarped, imgWarped_ORB, ORB_H, old_frame.size());
-                    std::cout << "oRB_WORKER.warpPerspective" << std::endl;
-
-                    old_frame = imgWarped_ORB.clone();
-
-                    aim_point = oRB_WORKER.get_ORB_swap(aim_point);
-
-
-                    oRB_WORKER.reset_H();
-                    std::cout << "oRB_WORKER.reset_H" << std::endl;
-                    std::cout << "Frame :" << i << " Map HIT" << std::endl;
-                    cv::Scalar color(0, 255, 255); // 蓝色圆圈 (BGR)
-
-                    // 绘制全画面十字线
-                    int line_thickness = 2; // 线条粗细
-
-                    // 绘制水平线
-                    cv::line(frame, cv::Point(0, aim_point.y), cv::Point(frame.cols - 1, aim_point.y),
-                             cv::Scalar(0, 255, 255), line_thickness);
-
-                    // 绘制垂直线
-                    cv::line(frame, cv::Point(aim_point.x, 0), cv::Point(aim_point.x, frame.rows - 1),
-                             cv::Scalar(0, 255, 255), line_thickness);
-                } else {
-                    std::cout << " NO H_hit " << std::endl;
-                }
-
+                // 绘制垂直线
+                cv::line(frame, cv::Point(aim_point.x, 0), cv::Point(aim_point.x, frame.rows - 1),
+                         cv::Scalar(0, 255, 255), line_thickness);
 
             } else if (matchPtr_statu == 0) {
-                std::cout << "Frame :" << i << " Map NULL" << std::endl;
+                std::cout << "Frame :" << i << " LOSS" << std::endl;
             }
             // 将原始图片缩小并贴到目标图片上
             cv::Mat targetImage = pasteScaledImage(old_frame, frame);

@@ -155,8 +155,8 @@ int RKNNModel_::run(rknn_core_mask mask) {
     auto end = std::chrono::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
-    std::cout << "network:" << double(duration.count()) * std::chrono::microseconds::period::num /
-                               std::chrono::microseconds::period::den * 1000 << std::endl;
+//    std::cout << "network:" << double(duration.count()) * std::chrono::microseconds::period::num /
+//                               std::chrono::microseconds::period::den * 1000 << std::endl;
 
     return 0;
 }
@@ -333,6 +333,12 @@ LightglueMatch::LightglueMatch(std::string model_superpoint_path, std::string mo
 
 
 void LightglueMatch::work_loop() {
+    cv::namedWindow("crop_update_frame", cv::WINDOW_NORMAL);
+    cv::namedWindow("crop_satellite", cv::WINDOW_NORMAL);
+
+    cv::moveWindow("crop_update_frame", 0, 0); // 左上角
+    cv::moveWindow("crop_satellite", 640, 0); // 右上角，假设每张图大小为640x480
+
     while (true) {
 
         if (system_state.load() == 0) {
@@ -345,7 +351,7 @@ void LightglueMatch::work_loop() {
             cv::cvtColor(_update_frame, GRAY_frame, cv::COLOR_BGR2GRAY);
             cv::cvtColor(_satellite, GRAY_satellite, cv::COLOR_BGR2GRAY);
 
-            if (ONLY_SP) {
+            if (false) {
 //                resize 相关工作
                 float resize_rate_w_satellite = float(_satellite.cols) / 960;
                 float resize_rate_h_satellite = float(_satellite.rows) / 544;
@@ -363,7 +369,24 @@ void LightglueMatch::work_loop() {
                 cv::resize(GRAY_satellite, resize_satellite_GRAY,
                            cv::Size(inference_w, inference_h));
                 std::pair<cv::Mat, bool> pai_SP = superPoint_inference(resize_frame_GRAY, resize_satellite_GRAY);
-                if (pai_SP.second) //标记运行结果
+
+                bool H_hit = true;
+                if (pai_SP.second) {
+                    double det = cv::determinant(pai_SP.first);
+                    cv::SVD svd(pai_SP.first);
+                    double maxSingularValue = *std::max_element(svd.w.begin<double>(), svd.w.end<double>());
+                    double minSingularValue = *std::min_element(svd.w.begin<double>(), svd.w.end<double>());
+                    double conditionNumber = maxSingularValue / minSingularValue;
+//                    std::cout << "LG Determinant: " << det << std::endl;
+//                    std::cout << "LG Condition Number: " << conditionNumber << std::endl;
+                    if (abs(1 - det) > 0.4) {
+                        H_hit = false;
+                    }
+
+                }
+
+
+                if (pai_SP.second && H_hit) //标记运行结果
                 {
                     //预测点
                     std::vector<cv::Point2f> _srcPoints(1, aim_point);
@@ -385,9 +408,8 @@ void LightglueMatch::work_loop() {
                 float crop_cent_x, h_rate, crop_cent_y;
                 std::pair<cv::Mat, bool> pai_LG;
                 int stap = 0;
-                if (false) {
-//                if (HIT_state.load() == 1) {
-                    stap = 1;
+//                if (false) {
+                if (HIT_state.load() == 1) {
                     crop_cent_x = aim_point_detect.x;
                     crop_cent_y = aim_point_detect.y;
 
@@ -400,15 +422,17 @@ void LightglueMatch::work_loop() {
                                                                                         aim_point.y,
                                                                                         inference_w, inference_h);
 
-                    cv::Mat img1, img2; // 假设有三张要显示的图片
+
+                    cv::imshow("crop_update_frame", crop_update_frame.first);
+                    cv::imshow("crop_satellite", crop_satellite.first);
+                    cv::waitKey(1000);
 
                     pai_LG = lightGlue_inference(crop_satellite.first, crop_update_frame.first,
-                                                 crop_satellite.second, crop_update_frame.second);
+                                                 crop_satellite.second, crop_update_frame.second, false);
 
 
                 } else {
 
-                    stap = 2;
                     float resize_rate_w_satellite = float(_satellite.cols) / 960;
                     float resize_rate_h_satellite = float(_satellite.rows) / 544;
 
@@ -432,27 +456,48 @@ void LightglueMatch::work_loop() {
 
                 }
 
-                if (pai_LG.second == true) //标记运行结果
-                {
-                    if (stap == 1) {
-                        //预测点
-                        std::vector<cv::Point2f> _srcPoints(1, aim_point);
-                        std::vector<cv::Point2f> _dstPoints;
-                        accumulate_H = pai_LG.first.clone();
-                        cv::perspectiveTransform(_srcPoints, _dstPoints, pai_LG.first);
-                        aim_point_detect.x = _dstPoints[0].x;
-                        aim_point_detect.y = _dstPoints[0].y;
 
-                    } else if (stap == 2) {
-                        std::vector<cv::Point2f> _srcPoints(1, aim_point);
-                        std::vector<cv::Point2f> _dstPoints;
-                        accumulate_H = pai_LG.first.clone();
 
-                        cv::perspectiveTransform(_srcPoints, _dstPoints, pai_LG.first);//转换到 弹 的视角
-
-                        aim_point_detect.x = _dstPoints[0].x;//弹敌点缩放
-                        aim_point_detect.y = _dstPoints[0].y;
+//                对于行列式和条件数，评判的标准主要取决于具体的应用场景和问题背景：
+//
+//                行列式(Determinant):
+//
+//                值的大小：
+//                在计算机视觉和图像处理领域，对于单应性矩阵H（homography matrix），行列式的值通常反映了变换后面积的变化。如果行列式的绝对值接近于0，可能意味着发生了退化变换（如映射到一条直线或一个点），这在实际情况中可能是异常或不期望的。理想的单应性矩阵行列式应远大于零，以避免退化现象。
+//                正负号：
+//                正负号则指示了旋转、反射等性质。在二维变换中，行列式为正通常表示只有旋转和平移，负值则可能包含了反射。
+//                条件数(Condition Number):
+//
+//                数值大小：
+//                条件数用于衡量矩阵对微小变化的敏感度。条件数越低，矩阵就越稳定，即输入数据的小变动只会引起输出结果的小变动。反之，高条件数意味着矩阵很“病态”，即便是微小的输入噪声也可能造成输出的巨大误差。
+//                对于单应性矩阵，条件数很高可能意味着存在透视失真或过度拉伸等情况，这种情况下，矩阵所描述的变换对输入数据的稳定性较差，可能会导致后续的图像配准、物体跟踪等任务出现严重误差。
+//                总结来说，对于一个良好的单应性矩阵，我们希望它的行列式非零且尽可能接近1（保持变换前后面积的比例大致不变），同时条件数尽量低，以保证矩阵的稳定性。
+                bool H_hit = true;
+                if (pai_LG.second) {
+                    double det = cv::determinant(pai_LG.first);
+                    cv::SVD svd(pai_LG.first);
+                    double maxSingularValue = *std::max_element(svd.w.begin<double>(), svd.w.end<double>());
+                    double minSingularValue = *std::min_element(svd.w.begin<double>(), svd.w.end<double>());
+                    double conditionNumber = maxSingularValue / minSingularValue;
+//                    std::cout << "LG Determinant: " << det << std::endl;
+//                    std::cout << "LG Condition Number: " << conditionNumber << std::endl;
+                    if (abs(1 - det) > 0.4) {
+                        H_hit = false;
                     }
+
+                }
+
+
+                if (pai_LG.second == true && H_hit) //标记运行结果
+                {
+
+                    std::vector<cv::Point2f> _srcPoints(1, aim_point);
+                    std::vector<cv::Point2f> _dstPoints;
+                    accumulate_H = pai_LG.first.clone();
+                    cv::perspectiveTransform(_srcPoints, _dstPoints, pai_LG.first);
+                    aim_point_detect.x = _dstPoints[0].x;
+                    aim_point_detect.y = _dstPoints[0].y;
+
                     loss_number = 0;
                     _async_flag.store(2);
                     HIT_state.store(1);
@@ -640,7 +685,6 @@ LightglueMatch::lightGlue_inference(cv::Mat img0, cv::Mat img1, cv::Point2f img0
             pts1.push_back(keypoint1[indice_x[i]].pt);
         }
     }
-
     if (pts0.size() < 4 || pts1.size() < 4) {
         cv::Mat H;
         return std::make_pair(H, false);
@@ -648,7 +692,11 @@ LightglueMatch::lightGlue_inference(cv::Mat img0, cv::Mat img1, cv::Point2f img0
 
     cv::Mat H, mask;
     H = cv::findHomography(pts0, pts1, cv::RANSAC, 3.0, mask);
-
+    int matchedPointsCount = cv::countNonZero(mask);
+    if (matchedPointsCount < 4) {
+        cv::Mat H;
+        return std::make_pair(H, false);
+    }
     return std::make_pair(H, true);
 }
 

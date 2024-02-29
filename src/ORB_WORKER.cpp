@@ -69,7 +69,7 @@ void ORB_WORKER::forwad(cv::Mat _currFrame) {
     }
 
     if (currDescriptors.rows < 30) {
-        accumulate_H = cv::Mat::eye(3, 3, CV_64F);
+//        accumulate_H = cv::Mat::eye(3, 3, CV_64F);
         isFirstFrame = true;
         std::cout << " currDescriptors 提取 异常 currDescriptors.rows： " << currDescriptors.rows << std::endl;
     } else {
@@ -97,15 +97,29 @@ void ORB_WORKER::forwad(cv::Mat _currFrame) {
             src_points.push_back(prevKeypoints[match.queryIdx].pt);
             dst_points.push_back(currKeypoints[match.trainIdx].pt);
         }
+        cv::Mat ORB_H = cv::findHomography(src_points, dst_points, cv::RANSAC);
 
-        // 计算透视变换的单应矩阵
-        accumulate_H *= cv::findHomography(src_points, dst_points, cv::RANSAC);
-        // 更新前一帧为当前帧
 
-        prevFrame = _currFrame.clone();
+        bool H_hit = true;
+        double det = cv::determinant(ORB_H);
+        cv::SVD svd(ORB_H);
+        double maxSingularValue = *std::max_element(svd.w.begin<double>(), svd.w.end<double>());
+        double minSingularValue = *std::min_element(svd.w.begin<double>(), svd.w.end<double>());
+        double conditionNumber = maxSingularValue / minSingularValue;
+//        std::cout << " ORB Determinant: " << det << std::endl;
+//        std::cout << "ORB Condition Number: " << conditionNumber << std::endl;
+        if (abs(1 - det) > 0.4) {
+            H_hit = false;
+        }
+        if (H_hit) {
+            // 计算透视变换的单应矩阵
+            accumulate_H *= cv::findHomography(src_points, dst_points, cv::RANSAC);
+            // 更新前一帧为当前帧
+            prevFrame = _currFrame.clone();
+            prevKeypoints.swap(currKeypoints);
+            prevDescriptors = currDescriptors.clone();
+        }
 
-        prevKeypoints.swap(currKeypoints);
-        prevDescriptors = currDescriptors.clone();
     }
 
 
