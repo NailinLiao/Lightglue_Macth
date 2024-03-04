@@ -11,30 +11,30 @@
 				<Option working_dir="/tmp/tmp.vWtDdVJsjc/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="rebuild_cache">
 				<Option working_dir="/tmp/tmp.vWtDdVJsjc/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
-					<CompileFile command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="edit_cache">
 				<Option working_dir="/tmp/tmp.vWtDdVJsjc/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
-					<CompileFile command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="lightglue_Macth">
@@ -69,12 +69,19 @@
 					<Add directory="/home/linaro/inst/db/install/include"/>
 					<Add directory="/tmp/tmp.vWtDdVJsjc/include"/>
 					<Add directory="/usr/include/opencv4"/>
+					<Add directory="/usr/include/c++/10"/>
+					<Add directory="/usr/include/aarch64-linux-gnu/c++/10"/>
+					<Add directory="/usr/include/c++/10/backward"/>
+					<Add directory="/usr/lib/gcc/aarch64-linux-gnu/10/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/aarch64-linux-gnu"/>
+					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 lightglue_Macth"/>
-					<CompileFile command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 lightglue_Macth"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="lightglue_Macth/fast">
@@ -109,12 +116,19 @@
 					<Add directory="/home/linaro/inst/db/install/include"/>
 					<Add directory="/tmp/tmp.vWtDdVJsjc/include"/>
 					<Add directory="/usr/include/opencv4"/>
+					<Add directory="/usr/include/c++/10"/>
+					<Add directory="/usr/include/aarch64-linux-gnu/c++/10"/>
+					<Add directory="/usr/include/c++/10/backward"/>
+					<Add directory="/usr/lib/gcc/aarch64-linux-gnu/10/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/aarch64-linux-gnu"/>
+					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 lightglue_Macth/fast"/>
-					<CompileFile command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/gmake -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 lightglue_Macth/fast"/>
+					<CompileFile command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j8 -f &quot;/tmp/tmp.vWtDdVJsjc/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>

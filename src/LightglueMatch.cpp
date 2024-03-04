@@ -333,11 +333,7 @@ LightglueMatch::LightglueMatch(std::string model_superpoint_path, std::string mo
 
 
 void LightglueMatch::work_loop() {
-    cv::namedWindow("crop_update_frame", cv::WINDOW_NORMAL);
-    cv::namedWindow("crop_satellite", cv::WINDOW_NORMAL);
 
-    cv::moveWindow("crop_update_frame", 0, 0); // 左上角
-    cv::moveWindow("crop_satellite", 640, 0); // 右上角，假设每张图大小为640x480
 
     while (true) {
 
@@ -352,7 +348,7 @@ void LightglueMatch::work_loop() {
             cv::cvtColor(_satellite, GRAY_satellite, cv::COLOR_BGR2GRAY);
 
             if (false) {
-//                resize 相关工作
+//                resize
                 float resize_rate_w_satellite = float(_satellite.cols) / 960;
                 float resize_rate_h_satellite = float(_satellite.rows) / 544;
 
@@ -377,8 +373,8 @@ void LightglueMatch::work_loop() {
                     double maxSingularValue = *std::max_element(svd.w.begin<double>(), svd.w.end<double>());
                     double minSingularValue = *std::min_element(svd.w.begin<double>(), svd.w.end<double>());
                     double conditionNumber = maxSingularValue / minSingularValue;
-//                    std::cout << "LG Determinant: " << det << std::endl;
-//                    std::cout << "LG Condition Number: " << conditionNumber << std::endl;
+                    std::cout << "LG Determinant: " << det << std::endl;
+                    std::cout << "LG Condition Number: " << conditionNumber << std::endl;
                     if (abs(1 - det) > 0.4) {
                         H_hit = false;
                     }
@@ -407,9 +403,10 @@ void LightglueMatch::work_loop() {
             } else {
                 float crop_cent_x, h_rate, crop_cent_y;
                 std::pair<cv::Mat, bool> pai_LG;
+
                 int stap = 0;
-//                if (false) {
-                if (HIT_state.load() == 1) {
+                if (false) {
+//                if (HIT_state.load() == 1) {
                     crop_cent_x = aim_point_detect.x;
                     crop_cent_y = aim_point_detect.y;
 
@@ -423,25 +420,18 @@ void LightglueMatch::work_loop() {
                                                                                         inference_w, inference_h);
 
 
-                    cv::imshow("crop_update_frame", crop_update_frame.first);
-                    cv::imshow("crop_satellite", crop_satellite.first);
-                    cv::waitKey(1000);
-
                     pai_LG = lightGlue_inference(crop_satellite.first, crop_update_frame.first,
                                                  crop_satellite.second, crop_update_frame.second, false);
 
 
                 } else {
 
+                    cv::Mat resize_frame_GRAY, resize_satellite_GRAY;
                     float resize_rate_w_satellite = float(_satellite.cols) / 960;
                     float resize_rate_h_satellite = float(_satellite.rows) / 544;
-
-
                     float resize_rate_w_update_frame = float(_update_frame.cols) / 960;
                     float resize_rate_h_update_frame = float(_update_frame.rows) / 544;
 
-
-                    cv::Mat resize_frame_GRAY, resize_satellite_GRAY;
                     cv::resize(GRAY_frame, resize_frame_GRAY,
                                cv::Size(inference_w, inference_h));
 
@@ -479,9 +469,9 @@ void LightglueMatch::work_loop() {
                     double maxSingularValue = *std::max_element(svd.w.begin<double>(), svd.w.end<double>());
                     double minSingularValue = *std::min_element(svd.w.begin<double>(), svd.w.end<double>());
                     double conditionNumber = maxSingularValue / minSingularValue;
-//                    std::cout << "LG Determinant: " << det << std::endl;
-//                    std::cout << "LG Condition Number: " << conditionNumber << std::endl;
-                    if (abs(1 - det) > 0.4) {
+                    std::cout << "LG Determinant: " << det << std::endl;
+                    std::cout << "LG Condition Number: " << conditionNumber << std::endl;
+                    if (abs(1 - det) > 0.7) {
                         H_hit = false;
                     }
 
@@ -490,6 +480,8 @@ void LightglueMatch::work_loop() {
 
                 if (pai_LG.second == true && H_hit) //标记运行结果
                 {
+
+                    int line_thickness = 2; // 线条粗细
 
                     std::vector<cv::Point2f> _srcPoints(1, aim_point);
                     std::vector<cv::Point2f> _dstPoints;
@@ -685,8 +677,11 @@ LightglueMatch::lightGlue_inference(cv::Mat img0, cv::Mat img1, cv::Point2f img0
             pts1.push_back(keypoint1[indice_x[i]].pt);
         }
     }
+
     if (pts0.size() < 4 || pts1.size() < 4) {
         cv::Mat H;
+        std::cout << "pts0.size() < 4 || pts1.size() < 4" << std::endl;
+
         return std::make_pair(H, false);
     }
 
@@ -695,6 +690,8 @@ LightglueMatch::lightGlue_inference(cv::Mat img0, cv::Mat img1, cv::Point2f img0
     int matchedPointsCount = cv::countNonZero(mask);
     if (matchedPointsCount < 4) {
         cv::Mat H;
+        std::cout << "matchedPointsCount< 4" << std::endl;
+
         return std::make_pair(H, false);
     }
     return std::make_pair(H, true);
