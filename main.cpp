@@ -159,13 +159,23 @@ int main() {
                   << ", " << cp.y << ")" << std::endl;
     }
 
-    bool loss = true;
+    bool recap = true;
 
     std::pair<cv::Mat, cv::Point2f> ret_corp;
     std::pair<cv::Mat, cv::Point2f> satellite_corp;
 
 
     cv::Point2f aim_point_Mat_satellite = cv::Point(Mat_satellite.cols / 2, Mat_satellite.rows / 2);
+
+
+    cv::line(Mat_satellite, cv::Point(0, aim_point_Mat_satellite.y),
+             cv::Point(Mat_satellite.cols - 1, aim_point_Mat_satellite.y),
+             cv::Scalar(0, 0, 0), line_thickness);
+    // 绘制垂直线
+    cv::line(Mat_satellite, cv::Point(aim_point_Mat_satellite.x, 0),
+             cv::Point(aim_point_Mat_satellite.x, Mat_satellite.rows - 1),
+             cv::Scalar(0, 0, 0), line_thickness);
+
     cv::Point2f aim_point_frame;//=ret+corp_point
     cv::Point2f aim_point_Mat_satellite_wap;//=ret in satellite_wap
     cv::Point aim_point_Mat_satellite_corp;
@@ -179,8 +189,8 @@ int main() {
         i++;
         oRB_WORKER.main_run(frame);
         if (i % 5 == 0 && i > 180) {
-//            if (loss) {
-            if (true) {
+            if (recap) {
+//            if (true) {
                 cv::Point2f corp_point;
                 int corp_index = 2;
                 //corp_index = (i+1) % crop_points.size();
@@ -192,9 +202,20 @@ int main() {
                     oRB_WORKER.reset_H();
                 }
             } else {
-                loss = true;
-//                return 1;
                 //此处执行精匹配
+                ret_corp = crop_and_pad_image_(frame, int(aim_point_frame.x), int(aim_point_frame.y), 960, 544);
+                satellite_corp = crop_and_pad_image_(Mat_satellite_wap, int(aim_point_Mat_satellite_wap.x),
+                                                     int(aim_point_Mat_satellite_wap.y), 960, 544);
+
+                aim_point_Mat_satellite_wap = cv::Point2f(960 / 2, 544 / 2);
+
+                int matchPtr_statu = lightglueMatch.get_statu();
+                if (matchPtr_statu != 1) {
+                    lightglueMatch.async(satellite_corp.first, ret_corp.first, aim_point_Mat_satellite_wap, false);
+                    oRB_WORKER.reset_H();
+                }
+                //cv::imwrite(std::to_string(i) + "satellite_corp.jpg", satellite_corp.first); // 左上角rm
+
             }
 
             int matchPtr_statu = lightglueMatch.get_statu();
@@ -211,21 +232,36 @@ int main() {
                 aim_point_frame.y = aim_point_ret.y + ret_corp.second.y;
                 aim_point_frame.x = aim_point_ret.x + ret_corp.second.x;
 
-                if (loss) {
-                    cv::warpPerspective(Mat_satellite, Mat_satellite_wap, _ret.first, Mat_satellite.size());
-                    aim_point_Mat_satellite_wap = aim_point_ret;
-                } else {
 
+                cv::line(ret_corp.first, cv::Point(0, aim_point_ret.y),
+                         cv::Point(ret_corp.first.cols - 1, aim_point_ret.y),
+                         cv::Scalar(0, 0, 255), line_thickness);
+                // 绘制垂直线
+                cv::line(ret_corp.first, cv::Point(aim_point_ret.x, 0),
+                         cv::Point(aim_point_ret.x, ret_corp.first.rows - 1),
+                         cv::Scalar(0, 0, 255), line_thickness);
+
+                //cv::imwrite(std::to_string(i) + "ret_corp.jpg", ret_corp.first); // 左上角rm
+
+                aim_point_Mat_satellite_wap = aim_point_ret;
+
+
+                if (recap) {
+                    cv::warpPerspective(Mat_satellite, Mat_satellite_wap, _ret.first, Mat_satellite.size());
+                } else {
+                    cv::warpPerspective(satellite_corp.first, Mat_satellite_wap, _ret.first,
+                                        satellite_corp.first.size());
                 }
-                loss = false;
+
+                recap = false;
             } else {
-//                loss
-                loss = true;
+//                recap
+                recap = true;
             }
 // 将原始图片缩小并贴到目标图片上
             cv::Mat Mat_satellite_wap_show = Mat_satellite_wap.clone();
 
-            if (!loss) {
+            if (!recap) {
                 // 绘制水平线
                 cv::line(frame, cv::Point(0, aim_point_frame.y), cv::Point(frame.cols - 1, aim_point_frame.y),
                          cv::Scalar(0, 255, 255), line_thickness);
