@@ -116,7 +116,6 @@ int main() {
     cv::resize(Mat_satellite, Mat_satellite,
                cv::Size(1920, 1080));
 
-    cv::Mat satellite_show = Mat_satellite.clone();
 //    读取视频
     if (!cap.isOpened()) {
         std::cerr << "Error: Could not open video file." << std::endl;
@@ -134,10 +133,6 @@ int main() {
 
 
     cv::Mat frame;
-
-    cv::Point2f aim_point = cv::Point(Mat_satellite.cols / 2, Mat_satellite.rows / 2);
-    cv::Point2f aim_point_frame = cv::Point(Mat_satellite.cols / 2, Mat_satellite.rows / 2);
-
 
     LightglueMatch lightglueMatch("../resource/superpoint.rknn", "../resource/lightglue_3layers.rknn", 1024);
     int i = 0;
@@ -164,58 +159,43 @@ int main() {
                   << ", " << cp.y << ")" << std::endl;
     }
 
-    int corp_index = 0;
-    bool Hit = false;
+    bool loss = true;
+
+    std::pair<cv::Mat, cv::Point2f> ret_corp;
+    std::pair<cv::Mat, cv::Point2f> satellite_corp;
+
+
+    cv::Point2f aim_point_Mat_satellite = cv::Point(Mat_satellite.cols / 2, Mat_satellite.rows / 2);
+    cv::Point2f aim_point_frame;//=ret+corp_point
+    cv::Point2f aim_point_Mat_satellite_wap;//=ret in satellite_wap
+    cv::Point aim_point_Mat_satellite_corp;
     int inference_w = 960;
     int inference_h = 544;
 
+
+    cv::Mat Mat_satellite_wap = Mat_satellite.clone();
+
     while (cap.read(frame)) { // 循环处理前500帧
         i++;
-//        oRB_WORKER.main_run(frame);
-        std::cout << "oRB_WORKER.main_run" << std::endl;
+        oRB_WORKER.main_run(frame);
         if (i % 5 == 0 && i > 180) {
-            std::pair<cv::Mat, cv::Point2f> ret_corp;
-            std::pair<cv::Mat, cv::Point2f> satellite_corp;
-            if (Hit) {
-
-                ret_corp = crop_and_pad_image_(frame, int(aim_point_frame.x), int(aim_point_frame.y), 960, 544);
-                satellite_corp = crop_and_pad_image_(Mat_satellite, int(aim_point.x), int(aim_point.y), 960, 544);
-                aim_point = cv::Point2f(satellite_corp.first.cols / 2, satellite_corp.first.rows / 2);
-
-                // 绘制水平线
-                cv::line(satellite_corp.first, cv::Point(0, aim_point.y),
-                         cv::Point(satellite_corp.first.cols - 1, aim_point.y),
-                         cv::Scalar(0, 0, 255), line_thickness);
-
-                // 绘制垂直线
-                cv::line(satellite_corp.first, cv::Point(aim_point.x, 0),
-                         cv::Point(aim_point.x, satellite_corp.first.rows - 1),
-                         cv::Scalar(0, 0, 255), line_thickness);
-
-
-                cv::imshow("satellite_corp", satellite_corp.first);
-                cv::moveWindow("satellite_corp", 960, 0); // 左上角rm
-                cv::imwrite(std::to_string(i) + "satellite_corp.jpg", satellite_corp.first); // 左上角rm
-
-                int matchPtr_statu = lightglueMatch.get_statu();
-                if (matchPtr_statu != 1) {
-
-                    lightglueMatch.async(satellite_corp.first, ret_corp.first, aim_point, false);
-                    oRB_WORKER.reset_H();
-                }
-            } else {
+//            if (loss) {
+            if (true) {
                 cv::Point2f corp_point;
-                corp_index = 2;
-                //corp_index = (corp_index + 1) % crop_points.size();
+                int corp_index = 2;
+                //corp_index = (i+1) % crop_points.size();
                 corp_point = crop_points[corp_index];
                 ret_corp = crop_and_pad_image_(frame, int(corp_point.x), int(corp_point.y), 1536, 870);
                 int matchPtr_statu = lightglueMatch.get_statu();
                 if (matchPtr_statu != 1) {
-                    lightglueMatch.async(Mat_satellite, ret_corp.first, aim_point, false);
+                    lightglueMatch.async(Mat_satellite, ret_corp.first, aim_point_Mat_satellite, false);
                     oRB_WORKER.reset_H();
                 }
+            } else {
+                loss = true;
+//                return 1;
+                //此处执行精匹配
             }
-
 
             int matchPtr_statu = lightglueMatch.get_statu();
 
@@ -223,43 +203,29 @@ int main() {
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 matchPtr_statu = lightglueMatch.get_statu();
             }
-
             if (matchPtr_statu == 2) {
                 std::cout << "Frame :" << i << " HIT" << std::endl;
                 std::pair<cv::Mat, cv::Point> _ret = lightglueMatch.syncronize();
-                cv::Mat imgWarped;
-                cv::Scalar color(0, 255, 255); // 蓝色圆圈 (BGR)
-
                 cv::Point2f aim_point_ret = _ret.second;
                 //                加上原图的裁切偏移量
                 aim_point_frame.y = aim_point_ret.y + ret_corp.second.y;
                 aim_point_frame.x = aim_point_ret.x + ret_corp.second.x;
 
-                if (Hit) {
-                    cv::warpPerspective(ret_corp.first, imgWarped, _ret.first, Mat_satellite.size());
-                    // 绘制水平线
-                    cv::line(ret_corp.first, cv::Point(0, aim_point_ret.y),
-                             cv::Point(ret_corp.first.cols - 1, aim_point_ret.y),
-                             cv::Scalar(0, 0, 255), line_thickness);
-
-                    // 绘制垂直线
-                    cv::line(ret_corp.first, cv::Point(aim_point_ret.x, 0),
-                             cv::Point(aim_point_ret.x, ret_corp.first.rows - 1),
-                             cv::Scalar(0, 0, 255), line_thickness);
-
-
-                    cv::imshow("ret_corp", ret_corp.first);
-                    cv::moveWindow("ret_corp", 960, 0); // 左上角rm
-                    cv::imwrite(std::to_string(i) + "ret_corp.jpg", ret_corp.first); // 左上角rm
-
+                if (loss) {
+                    cv::warpPerspective(Mat_satellite, Mat_satellite_wap, _ret.first, Mat_satellite.size());
+                    aim_point_Mat_satellite_wap = aim_point_ret;
                 } else {
-                    Hit = true;//标记命中的切点;
-                    cv::warpPerspective(Mat_satellite, imgWarped, _ret.first, Mat_satellite.size());
+
                 }
-                Mat_satellite = imgWarped.clone();
-                satellite_show = imgWarped.clone();
+                loss = false;
+            } else {
+//                loss
+                loss = true;
+            }
+// 将原始图片缩小并贴到目标图片上
+            cv::Mat Mat_satellite_wap_show = Mat_satellite_wap.clone();
 
-
+            if (!loss) {
                 // 绘制水平线
                 cv::line(frame, cv::Point(0, aim_point_frame.y), cv::Point(frame.cols - 1, aim_point_frame.y),
                          cv::Scalar(0, 255, 255), line_thickness);
@@ -268,25 +234,18 @@ int main() {
                 cv::line(frame, cv::Point(aim_point_frame.x, 0), cv::Point(aim_point_frame.x, frame.rows - 1),
                          cv::Scalar(0, 255, 255), line_thickness);
 
-                aim_point = aim_point_ret;
 
-                // 绘制水平线
-                cv::line(satellite_show, cv::Point(0, aim_point.y),
-                         cv::Point(satellite_show.cols - 1, aim_point.y),
+                cv::line(Mat_satellite_wap_show, cv::Point(0, aim_point_Mat_satellite_wap.y),
+                         cv::Point(Mat_satellite_wap_show.cols - 1, aim_point_Mat_satellite_wap.y),
                          cv::Scalar(0, 255, 255), line_thickness);
 
                 // 绘制垂直线
-                cv::line(satellite_show, cv::Point(aim_point.x, 0),
-                         cv::Point(aim_point.x, satellite_show.rows - 1),
+                cv::line(Mat_satellite_wap_show, cv::Point(aim_point_Mat_satellite_wap.x, 0),
+                         cv::Point(aim_point_Mat_satellite_wap.x, Mat_satellite_wap_show.rows - 1),
                          cv::Scalar(0, 255, 255), line_thickness);
-
-
-            } else if (matchPtr_statu == 0) {
-                std::cout << "Frame :" << i << " LOSS" << std::endl;
             }
 
-// 将原始图片缩小并贴到目标图片上
-            cv::Mat targetImage = pasteScaledImage(satellite_show, frame);
+            cv::Mat targetImage = pasteScaledImage(Mat_satellite_wap_show, frame);//Mat_satellite_wap
 
             // 保存结果图片
             cv::imshow("show", targetImage);
@@ -300,9 +259,16 @@ int main() {
         cv::waitKey(1);
 
     }
-    // 释放资源
-    cap.release();
-    writer.release();
+
+// 释放资源
+    cap.
+
+            release();
+
+    writer.
+
+            release();
+
     cv::destroyAllWindows();
 
     return 0;
