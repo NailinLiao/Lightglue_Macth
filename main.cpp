@@ -178,7 +178,7 @@ int main() {
 
     cv::Point2f aim_point_frame;//=ret+corp_point
     cv::Point2f aim_point_Mat_satellite_wap;//=ret in satellite_wap
-    cv::Point aim_point_Mat_satellite_corp;
+
     int inference_w = 960;
     int inference_h = 544;
 
@@ -203,6 +203,7 @@ int main() {
                 }
             } else {
                 //此处执行精匹配
+//                添加ORB工作逻辑
                 ret_corp = crop_and_pad_image_(frame, int(aim_point_frame.x), int(aim_point_frame.y), 960, 544);
                 satellite_corp = crop_and_pad_image_(Mat_satellite_wap, int(aim_point_Mat_satellite_wap.x),
                                                      int(aim_point_Mat_satellite_wap.y), 960, 544);
@@ -255,7 +256,6 @@ int main() {
 
                 recap = false;
             } else {
-//                recap
                 recap = true;
             }
 // 将原始图片缩小并贴到目标图片上
@@ -269,7 +269,6 @@ int main() {
                 // 绘制垂直线
                 cv::line(frame, cv::Point(aim_point_frame.x, 0), cv::Point(aim_point_frame.x, frame.rows - 1),
                          cv::Scalar(0, 255, 255), line_thickness);
-
 
                 cv::line(Mat_satellite_wap_show, cv::Point(0, aim_point_Mat_satellite_wap.y),
                          cv::Point(Mat_satellite_wap_show.cols - 1, aim_point_Mat_satellite_wap.y),
