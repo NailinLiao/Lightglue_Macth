@@ -73,19 +73,22 @@ private:
 
     std::shared_ptr<std::thread> work_loop_thread_ptr;
     cv::Mat _update_frame, _satellite;
-    std::atomic_bool ONLY_SP;
+    std::atomic_bool KNN_LG;
+    std::atomic_bool UPDATA_satellite;
     std::atomic_int system_state;//  0 static,1 run;
     std::atomic_int HIT_state;//  0 static,1 run;
     std::atomic_int _async_flag; //  0,1,2 LIKE none, run, hit,
     int inference_w;
     int inference_h;
-
+    std::vector<cv::KeyPoint> keypoint0, keypoint1;
+    cv::Mat feature0, feature1;
+    cv::Point2f resize_rate_frame;
+    cv::Point2f resize_rate_satellite;
 
 public:
 
     std::pair<cv::Mat, bool>
-    lightGlue_inference(cv::Mat img0, cv::Mat img1, cv::Point2f img0_cut_point = cv::Point2f(0, 0),
-                        cv::Point2f img1_cut_point = cv::Point2f(0, 0), bool rate = false);
+    lightGlue_inference(cv::Mat img0, cv::Mat img1);
 
     std::pair<cv::Mat, bool> superPoint_inference(cv::Mat img0, cv::Mat img1);
 

@@ -77,129 +77,6 @@ cv::Mat pasteScaledImage(cv::Mat src, cv::Mat dst) {
     return dst;
 }
 
-int main_back() {
-    cv::VideoCapture cap("../resource/test_video.mp4"); // 替换为你的视频文件路径
-    cv::Mat Mat_satellite = cv::imread("../resource/test_mat.jpg");
-    Mat_satellite = rotateImage(Mat_satellite, 180, cv::Point2f(Mat_satellite.cols / 2, Mat_satellite.rows / 2));
-    cv::resize(Mat_satellite, Mat_satellite,
-               cv::Size(1920, 1080));
-
-    if (!cap.isOpened()) {
-        std::cerr << "Error: Could not open video file." << std::endl;
-        return -1;
-    }
-
-
-    // 输出视频的参数设置
-    int frameWidth = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_WIDTH));
-    int frameHeight = static_cast<int>(cap.get(cv::CAP_PROP_FRAME_HEIGHT));
-    double fps = cap.get(cv::CAP_PROP_FPS);
-
-    // 创建VideoWriter对象以写入视频
-    cv::VideoWriter writer("output.mp4", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), fps,
-                           cv::Size(frameWidth, frameHeight));
-
-
-    cv::Mat frame;
-    cv::Mat old_frame;
-//    cap >> old_frame; // 读取第一帧
-    old_frame = Mat_satellite.clone();
-
-
-    cv::Point2f aim_point = cv::Point(960, 544);
-//    cv::Point aim_point = cv::Point(960, 540);
-    cv::Point2f points[4] = {cv::Point2f(0, 0), cv::Point2f(1920, 0), cv::Point2f(1920, 1080),
-                             cv::Point2f(0, 1080),}; // 初始化四个二维点
-
-    int radius = 5; // 圆的半径
-    cv::Scalar color(0, 255, 255); // 蓝色圆圈 (BGR)
-    int thickness = 2; // 线条粗细
-    cv::circle(old_frame, aim_point,
-               radius, color,
-               thickness);
-
-    LightglueMatch lightglueMatch("../resource/superpoint.rknn", "../resource/lightglue_3layers.rknn", 1024);
-    int i = 0;
-    ORB_WORKER oRB_WORKER = ORB_WORKER(0.2, 1920, 1080);
-
-    while (cap.read(frame) && i < 300) { // 循环处理前500帧
-
-        i++;
-//        在此处累积ORB
-        oRB_WORKER.main_run(frame);
-        std::cout << "oRB_WORKER.main_run" << std::endl;
-        if (i % 5 == 0) {
-
-            int matchPtr_statu = lightglueMatch.get_statu();
-
-            if (matchPtr_statu != 1) {
-                std::cout << "Frame :" << i << " async STAY " << std::endl;
-                lightglueMatch.async(old_frame, frame, aim_point, false);
-                oRB_WORKER.reset_H();
-
-            }
-
-            matchPtr_statu = lightglueMatch.get_statu();
-
-            while (matchPtr_statu == 1) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
-                matchPtr_statu = lightglueMatch.get_statu();
-            }
-
-            if (matchPtr_statu == 2) {
-                std::cout << "Frame :" << i << " HIT" << std::endl;
-
-                std::pair<cv::Mat, cv::Point> _ret = lightglueMatch.syncronize();
-
-                cv::Mat imgWarped;
-                cv::warpPerspective(old_frame, imgWarped, _ret.first, old_frame.size());
-
-                aim_point = _ret.second;
-
-                cv::Mat ORB_H = oRB_WORKER.get_H();
-                cv::Mat imgWarped_ORB;
-
-                cv::warpPerspective(imgWarped, imgWarped_ORB, ORB_H, old_frame.size());
-                std::cout << "oRB_WORKER.warpPerspective" << std::endl;
-
-                old_frame = imgWarped_ORB.clone();
-                aim_point = oRB_WORKER.get_ORB_swap(aim_point);
-
-                cv::Scalar color(0, 255, 255); // 蓝色圆圈 (BGR)
-
-                // 绘制全画面十字线
-                int line_thickness = 2; // 线条粗细
-
-                // 绘制水平线
-                cv::line(frame, cv::Point(0, aim_point.y), cv::Point(frame.cols - 1, aim_point.y),
-                         cv::Scalar(0, 255, 255), line_thickness);
-
-                // 绘制垂直线
-                cv::line(frame, cv::Point(aim_point.x, 0), cv::Point(aim_point.x, frame.rows - 1),
-                         cv::Scalar(0, 255, 255), line_thickness);
-
-            } else if (matchPtr_statu == 0) {
-                std::cout << "Frame :" << i << " LOSS" << std::endl;
-            }
-            // 将原始图片缩小并贴到目标图片上
-            cv::Mat targetImage = pasteScaledImage(old_frame, frame);
-
-            // 保存结果图片
-            cv::imshow("targetImage", targetImage);
-            cv::imwrite(std::to_string(i) + "_targetImage.jpg", targetImage);
-            writer.write(targetImage);
-            cv::waitKey(1);
-        }
-
-    }
-    // 释放资源
-    cap.release();
-    writer.release();
-    cv::destroyAllWindows();
-
-    return 0;
-}
-
 
 std::vector<cv::Point2f> calculate_crop_points(int original_height,
                                                int original_width,
@@ -224,16 +101,12 @@ std::vector<cv::Point2f> calculate_crop_points(int original_height,
     return crop_points;
 }
 
-
 int main() {
 
 //    读取卫星图，旋转卫星图，resie标准化卫星图；
 
     cv::Mat Mat_satellite = cv::imread("../resource/1500.jpeg");
     cv::VideoCapture cap("../resource/test_video.mp4"); // 替换为你的视频文件路径
-//
-//    cv::Mat Mat_satellite = cv::imread("../resource/1.png");
-//    cv::VideoCapture cap("../resource/1.mp4"); // 替换为你的视频文件路径
 
     if (Mat_satellite.empty()) {
         std::cerr << "Error: Could not open or find the image!" << std::endl;
@@ -243,7 +116,7 @@ int main() {
     cv::resize(Mat_satellite, Mat_satellite,
                cv::Size(1920, 1080));
 
-
+    cv::Mat satellite_show = Mat_satellite.clone();
 //    读取视频
     if (!cap.isOpened()) {
         std::cerr << "Error: Could not open video file." << std::endl;
@@ -263,6 +136,7 @@ int main() {
     cv::Mat frame;
 
     cv::Point2f aim_point = cv::Point(Mat_satellite.cols / 2, Mat_satellite.rows / 2);
+    cv::Point2f aim_point_frame = cv::Point(Mat_satellite.cols / 2, Mat_satellite.rows / 2);
 
 
     LightglueMatch lightglueMatch("../resource/superpoint.rknn", "../resource/lightglue_3layers.rknn", 1024);
@@ -281,16 +155,6 @@ int main() {
     // 绘制全画面十字线
     int line_thickness = 2; // 线条粗细
 
-    // 绘制水平线
-    cv::line(Mat_satellite, cv::Point(0, aim_point.y),
-             cv::Point(Mat_satellite.cols - 1, aim_point.y),
-             cv::Scalar(0, 255, 255), line_thickness);
-
-    // 绘制垂直线
-    cv::line(Mat_satellite, cv::Point(aim_point.x, 0),
-             cv::Point(aim_point.x, Mat_satellite.rows - 1),
-             cv::Scalar(0, 255, 255), line_thickness);
-
 
     std::vector<cv::Point2f> crop_points = {cv::Point2f(img_width / 2, 0), cv::Point2f(img_width / 2, 384),
                                             cv::Point2f(img_width / 2, 768), cv::Point2f(img_width / 2, 1152),
@@ -300,38 +164,60 @@ int main() {
                   << ", " << cp.y << ")" << std::endl;
     }
 
-    bool find_Common_area = false;
     int corp_index = 0;
+    bool Hit = false;
+    int inference_w = 960;
+    int inference_h = 544;
+
     while (cap.read(frame)) { // 循环处理前500帧
         i++;
-        oRB_WORKER.main_run(frame);
+//        oRB_WORKER.main_run(frame);
         std::cout << "oRB_WORKER.main_run" << std::endl;
-        if (i % 5 == 0) {
-            cv::Point2f corp_point;
+        if (i % 5 == 0 && i > 180) {
             std::pair<cv::Mat, cv::Point2f> ret_corp;
-            if (find_Common_area) {
-//            此处要添加ORB；
-                cv::Point2f corp_point_OEB = oRB_WORKER.get_ORB_swap(aim_point);
-                ret_corp = crop_and_pad_image_(frame, int(corp_point_OEB.x), int(corp_point_OEB.y), 960, 540);
-            } else {
-                corp_index = (corp_index + 1) % crop_points.size();
-//                corp_index = 2;
+            std::pair<cv::Mat, cv::Point2f> satellite_corp;
+            if (Hit) {
 
+                ret_corp = crop_and_pad_image_(frame, int(aim_point_frame.x), int(aim_point_frame.y), 960, 544);
+                satellite_corp = crop_and_pad_image_(Mat_satellite, int(aim_point.x), int(aim_point.y), 960, 544);
+                aim_point = cv::Point2f(satellite_corp.first.cols / 2, satellite_corp.first.rows / 2);
+
+                // 绘制水平线
+                cv::line(satellite_corp.first, cv::Point(0, aim_point.y),
+                         cv::Point(satellite_corp.first.cols - 1, aim_point.y),
+                         cv::Scalar(0, 0, 255), line_thickness);
+
+                // 绘制垂直线
+                cv::line(satellite_corp.first, cv::Point(aim_point.x, 0),
+                         cv::Point(aim_point.x, satellite_corp.first.rows - 1),
+                         cv::Scalar(0, 0, 255), line_thickness);
+
+
+                cv::imshow("satellite_corp", satellite_corp.first);
+                cv::moveWindow("satellite_corp", 960, 0); // 左上角rm
+                cv::imwrite(std::to_string(i) + "satellite_corp.jpg", satellite_corp.first); // 左上角rm
+
+                int matchPtr_statu = lightglueMatch.get_statu();
+                if (matchPtr_statu != 1) {
+
+                    lightglueMatch.async(satellite_corp.first, ret_corp.first, aim_point, false);
+                    oRB_WORKER.reset_H();
+                }
+            } else {
+                cv::Point2f corp_point;
+                corp_index = 2;
+                //corp_index = (corp_index + 1) % crop_points.size();
                 corp_point = crop_points[corp_index];
-                std::cout << "corp_point.run corp_point.y" << corp_point.y
-                          << std::endl;
                 ret_corp = crop_and_pad_image_(frame, int(corp_point.x), int(corp_point.y), 1536, 870);
+                int matchPtr_statu = lightglueMatch.get_statu();
+                if (matchPtr_statu != 1) {
+                    lightglueMatch.async(Mat_satellite, ret_corp.first, aim_point, false);
+                    oRB_WORKER.reset_H();
+                }
             }
+
 
             int matchPtr_statu = lightglueMatch.get_statu();
-
-            if (matchPtr_statu != 1) {
-                lightglueMatch.async(Mat_satellite, ret_corp.first, aim_point, false);
-                oRB_WORKER.reset_H();
-
-            }
-
-            matchPtr_statu = lightglueMatch.get_statu();
 
             while (matchPtr_statu == 1) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -340,36 +226,67 @@ int main() {
 
             if (matchPtr_statu == 2) {
                 std::cout << "Frame :" << i << " HIT" << std::endl;
-                find_Common_area = true;//标记命中的切点;
                 std::pair<cv::Mat, cv::Point> _ret = lightglueMatch.syncronize();
-
                 cv::Mat imgWarped;
-                cv::warpPerspective(Mat_satellite, imgWarped, _ret.first, Mat_satellite.size());
+                cv::Scalar color(0, 255, 255); // 蓝色圆圈 (BGR)
 
                 cv::Point2f aim_point_ret = _ret.second;
-
-                
                 //                加上原图的裁切偏移量
-                aim_point.y = aim_point_ret.y + ret_corp.second.y;
-                aim_point.x = aim_point_ret.x + ret_corp.second.x;
+                aim_point_frame.y = aim_point_ret.y + ret_corp.second.y;
+                aim_point_frame.x = aim_point_ret.x + ret_corp.second.x;
 
-                cv::Scalar color(0, 255, 255); // 蓝色圆圈 (BGR)
+                if (Hit) {
+                    cv::warpPerspective(ret_corp.first, imgWarped, _ret.first, Mat_satellite.size());
+                    // 绘制水平线
+                    cv::line(ret_corp.first, cv::Point(0, aim_point_ret.y),
+                             cv::Point(ret_corp.first.cols - 1, aim_point_ret.y),
+                             cv::Scalar(0, 0, 255), line_thickness);
+
+                    // 绘制垂直线
+                    cv::line(ret_corp.first, cv::Point(aim_point_ret.x, 0),
+                             cv::Point(aim_point_ret.x, ret_corp.first.rows - 1),
+                             cv::Scalar(0, 0, 255), line_thickness);
+
+
+                    cv::imshow("ret_corp", ret_corp.first);
+                    cv::moveWindow("ret_corp", 960, 0); // 左上角rm
+                    cv::imwrite(std::to_string(i) + "ret_corp.jpg", ret_corp.first); // 左上角rm
+
+                } else {
+                    Hit = true;//标记命中的切点;
+                    cv::warpPerspective(Mat_satellite, imgWarped, _ret.first, Mat_satellite.size());
+                }
+                Mat_satellite = imgWarped.clone();
+                satellite_show = imgWarped.clone();
 
 
                 // 绘制水平线
-                cv::line(frame, cv::Point(0, aim_point.y), cv::Point(frame.cols - 1, aim_point.y),
+                cv::line(frame, cv::Point(0, aim_point_frame.y), cv::Point(frame.cols - 1, aim_point_frame.y),
                          cv::Scalar(0, 255, 255), line_thickness);
 
                 // 绘制垂直线
-                cv::line(frame, cv::Point(aim_point.x, 0), cv::Point(aim_point.x, frame.rows - 1),
+                cv::line(frame, cv::Point(aim_point_frame.x, 0), cv::Point(aim_point_frame.x, frame.rows - 1),
                          cv::Scalar(0, 255, 255), line_thickness);
+
+                aim_point = aim_point_ret;
+
+                // 绘制水平线
+                cv::line(satellite_show, cv::Point(0, aim_point.y),
+                         cv::Point(satellite_show.cols - 1, aim_point.y),
+                         cv::Scalar(0, 255, 255), line_thickness);
+
+                // 绘制垂直线
+                cv::line(satellite_show, cv::Point(aim_point.x, 0),
+                         cv::Point(aim_point.x, satellite_show.rows - 1),
+                         cv::Scalar(0, 255, 255), line_thickness);
+
 
             } else if (matchPtr_statu == 0) {
                 std::cout << "Frame :" << i << " LOSS" << std::endl;
             }
 
 // 将原始图片缩小并贴到目标图片上
-            cv::Mat targetImage = pasteScaledImage(Mat_satellite, frame);
+            cv::Mat targetImage = pasteScaledImage(satellite_show, frame);
 
             // 保存结果图片
             cv::imshow("show", targetImage);
