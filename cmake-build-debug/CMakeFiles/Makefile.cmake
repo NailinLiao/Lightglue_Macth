@@ -52,5 +52,6 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
-  "CMakeFiles/lightglue_Macth.dir/DependInfo.cmake"
+  "CMakeFiles/lightglue_Macth_Scaling.dir/DependInfo.cmake"
+  "CMakeFiles/lightglue_Macth_main.dir/DependInfo.cmake"
   )

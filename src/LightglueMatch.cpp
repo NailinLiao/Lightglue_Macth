@@ -405,7 +405,6 @@ void LightglueMatch::async(cv::Mat satellite, cv::Mat frame, cv::Point _aim_poin
 
     if (satellite.cols != inference_w || frame.cols != inference_w
         || frame.rows != inference_h || satellite.rows != inference_h) {
-        std::cout << "6666" << std::endl;
 
         float resize_rate_w_satellite = float(satellite.cols) / inference_w;
         float resize_rate_h_satellite = float(satellite.rows) / inference_h;

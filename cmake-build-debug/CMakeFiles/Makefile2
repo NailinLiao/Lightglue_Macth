@@ -72,7 +72,8 @@ CMAKE_BINARY_DIR = /tmp/tmp.vWtDdVJsjc/cmake-build-debug
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/lightglue_Macth.dir/all
+all: CMakeFiles/lightglue_Macth_Scaling.dir/all
+all: CMakeFiles/lightglue_Macth_main.dir/all
 
 .PHONY : all
 
@@ -82,36 +83,64 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/lightglue_Macth.dir/clean
+clean: CMakeFiles/lightglue_Macth_Scaling.dir/clean
+clean: CMakeFiles/lightglue_Macth_main.dir/clean
 
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/lightglue_Macth.dir
+# Target rules for target CMakeFiles/lightglue_Macth_Scaling.dir
 
 # All Build rule for target.
-CMakeFiles/lightglue_Macth.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/tmp/tmp.vWtDdVJsjc/cmake-build-debug/CMakeFiles --progress-num=1,2,3,4 "Built target lightglue_Macth"
-.PHONY : CMakeFiles/lightglue_Macth.dir/all
+CMakeFiles/lightglue_Macth_Scaling.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_Scaling.dir/build.make CMakeFiles/lightglue_Macth_Scaling.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_Scaling.dir/build.make CMakeFiles/lightglue_Macth_Scaling.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/tmp/tmp.vWtDdVJsjc/cmake-build-debug/CMakeFiles --progress-num=1,2,3,4 "Built target lightglue_Macth_Scaling"
+.PHONY : CMakeFiles/lightglue_Macth_Scaling.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/lightglue_Macth.dir/rule: cmake_check_build_system
+CMakeFiles/lightglue_Macth_Scaling.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /tmp/tmp.vWtDdVJsjc/cmake-build-debug/CMakeFiles 4
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/lightglue_Macth.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/lightglue_Macth_Scaling.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /tmp/tmp.vWtDdVJsjc/cmake-build-debug/CMakeFiles 0
-.PHONY : CMakeFiles/lightglue_Macth.dir/rule
+.PHONY : CMakeFiles/lightglue_Macth_Scaling.dir/rule
 
 # Convenience name for target.
-lightglue_Macth: CMakeFiles/lightglue_Macth.dir/rule
+lightglue_Macth_Scaling: CMakeFiles/lightglue_Macth_Scaling.dir/rule
 
-.PHONY : lightglue_Macth
+.PHONY : lightglue_Macth_Scaling
 
 # clean rule for target.
-CMakeFiles/lightglue_Macth.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/clean
-.PHONY : CMakeFiles/lightglue_Macth.dir/clean
+CMakeFiles/lightglue_Macth_Scaling.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_Scaling.dir/build.make CMakeFiles/lightglue_Macth_Scaling.dir/clean
+.PHONY : CMakeFiles/lightglue_Macth_Scaling.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/lightglue_Macth_main.dir
+
+# All Build rule for target.
+CMakeFiles/lightglue_Macth_main.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_main.dir/build.make CMakeFiles/lightglue_Macth_main.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_main.dir/build.make CMakeFiles/lightglue_Macth_main.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/tmp/tmp.vWtDdVJsjc/cmake-build-debug/CMakeFiles --progress-num=5,6,7,8 "Built target lightglue_Macth_main"
+.PHONY : CMakeFiles/lightglue_Macth_main.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/lightglue_Macth_main.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /tmp/tmp.vWtDdVJsjc/cmake-build-debug/CMakeFiles 4
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/lightglue_Macth_main.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /tmp/tmp.vWtDdVJsjc/cmake-build-debug/CMakeFiles 0
+.PHONY : CMakeFiles/lightglue_Macth_main.dir/rule
+
+# Convenience name for target.
+lightglue_Macth_main: CMakeFiles/lightglue_Macth_main.dir/rule
+
+.PHONY : lightglue_Macth_main
+
+# clean rule for target.
+CMakeFiles/lightglue_Macth_main.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_main.dir/build.make CMakeFiles/lightglue_Macth_main.dir/clean
+.PHONY : CMakeFiles/lightglue_Macth_main.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

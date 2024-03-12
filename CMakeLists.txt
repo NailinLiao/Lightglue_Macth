@@ -21,7 +21,7 @@ file(GLOB_RECURSE ORB_HEAD include/*.hpp include/*.h)
 
 #add_executable( main.cpp src/ORB_WORKER.cpp)
 
-add_executable(lightglue_Macth
+add_executable(lightglue_Macth_main
         ${ORB_SRC}
         ${ORB_HEAD}
         ${CORE_LIB_SRC}
@@ -31,7 +31,7 @@ add_executable(lightglue_Macth
         main.cpp
         )
 
-target_link_libraries(lightglue_Macth
+target_link_libraries(lightglue_Macth_main
         pthread
         ${FMT_LIBRARY}
         ${BOOST_LIBRARY}
@@ -45,6 +45,32 @@ target_link_libraries(lightglue_Macth
         ${RKAIQ_LIBRARY}
         ${DB_LIBRARY}
         )
+
+add_executable(lightglue_Macth_Scaling
+        ${ORB_SRC}
+        ${ORB_HEAD}
+        ${CORE_LIB_SRC}
+        ${CORE_LIB_HEAD}
+        ${OPENCV_LIB_SRC}
+        ${OPENCV_LIB_HEAD}
+        Scaling.cpp
+        )
+
+target_link_libraries(lightglue_Macth_Scaling
+        pthread
+        ${FMT_LIBRARY}
+        ${BOOST_LIBRARY}
+        ${RGA_LIBRARY}
+        ${OpenCV_LIBS}
+        ${RKNN_LIBRARY}
+        ${FFTW_LIBRARY}
+        ${FREETYPE_LIBRARY}
+        ${MPP_LIBRARY}
+        ${MPPENCODER_LIBRARY}
+        ${RKAIQ_LIBRARY}
+        ${DB_LIBRARY}
+        )
+
 
 ## 链接OpenCV库到目标可执行文件
 #target_link_libraries(ORB_Jitter PRIVATE ${OpenCV_LIBS})

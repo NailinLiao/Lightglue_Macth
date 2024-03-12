@@ -75,17 +75,6 @@ CMAKE_BINARY_DIR = /tmp/tmp.vWtDdVJsjc/cmake-build-debug
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
-
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
-
-.PHONY : rebuild_cache/fast
-
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
@@ -96,6 +85,17 @@ edit_cache:
 edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
+
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/usr/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
+
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
+
+.PHONY : rebuild_cache/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -130,17 +130,57 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named lightglue_Macth
+# Target rules for targets named lightglue_Macth_Scaling
 
 # Build rule for target.
-lightglue_Macth: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 lightglue_Macth
-.PHONY : lightglue_Macth
+lightglue_Macth_Scaling: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 lightglue_Macth_Scaling
+.PHONY : lightglue_Macth_Scaling
 
 # fast build rule for target.
-lightglue_Macth/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/build
-.PHONY : lightglue_Macth/fast
+lightglue_Macth_Scaling/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_Scaling.dir/build.make CMakeFiles/lightglue_Macth_Scaling.dir/build
+.PHONY : lightglue_Macth_Scaling/fast
+
+#=============================================================================
+# Target rules for targets named lightglue_Macth_main
+
+# Build rule for target.
+lightglue_Macth_main: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 lightglue_Macth_main
+.PHONY : lightglue_Macth_main
+
+# fast build rule for target.
+lightglue_Macth_main/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_main.dir/build.make CMakeFiles/lightglue_Macth_main.dir/build
+.PHONY : lightglue_Macth_main/fast
+
+Scaling.o: Scaling.cpp.o
+
+.PHONY : Scaling.o
+
+# target to build an object file
+Scaling.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_Scaling.dir/build.make CMakeFiles/lightglue_Macth_Scaling.dir/Scaling.cpp.o
+.PHONY : Scaling.cpp.o
+
+Scaling.i: Scaling.cpp.i
+
+.PHONY : Scaling.i
+
+# target to preprocess a source file
+Scaling.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_Scaling.dir/build.make CMakeFiles/lightglue_Macth_Scaling.dir/Scaling.cpp.i
+.PHONY : Scaling.cpp.i
+
+Scaling.s: Scaling.cpp.s
+
+.PHONY : Scaling.s
+
+# target to generate assembly for a file
+Scaling.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_Scaling.dir/build.make CMakeFiles/lightglue_Macth_Scaling.dir/Scaling.cpp.s
+.PHONY : Scaling.cpp.s
 
 main.o: main.cpp.o
 
@@ -148,7 +188,7 @@ main.o: main.cpp.o
 
 # target to build an object file
 main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/main.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_main.dir/build.make CMakeFiles/lightglue_Macth_main.dir/main.cpp.o
 .PHONY : main.cpp.o
 
 main.i: main.cpp.i
@@ -157,7 +197,7 @@ main.i: main.cpp.i
 
 # target to preprocess a source file
 main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/main.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_main.dir/build.make CMakeFiles/lightglue_Macth_main.dir/main.cpp.i
 .PHONY : main.cpp.i
 
 main.s: main.cpp.s
@@ -166,7 +206,7 @@ main.s: main.cpp.s
 
 # target to generate assembly for a file
 main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/main.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_main.dir/build.make CMakeFiles/lightglue_Macth_main.dir/main.cpp.s
 .PHONY : main.cpp.s
 
 src/LightglueMatch.o: src/LightglueMatch.cpp.o
@@ -175,7 +215,8 @@ src/LightglueMatch.o: src/LightglueMatch.cpp.o
 
 # target to build an object file
 src/LightglueMatch.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/src/LightglueMatch.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_Scaling.dir/build.make CMakeFiles/lightglue_Macth_Scaling.dir/src/LightglueMatch.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_main.dir/build.make CMakeFiles/lightglue_Macth_main.dir/src/LightglueMatch.cpp.o
 .PHONY : src/LightglueMatch.cpp.o
 
 src/LightglueMatch.i: src/LightglueMatch.cpp.i
@@ -184,7 +225,8 @@ src/LightglueMatch.i: src/LightglueMatch.cpp.i
 
 # target to preprocess a source file
 src/LightglueMatch.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/src/LightglueMatch.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_Scaling.dir/build.make CMakeFiles/lightglue_Macth_Scaling.dir/src/LightglueMatch.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_main.dir/build.make CMakeFiles/lightglue_Macth_main.dir/src/LightglueMatch.cpp.i
 .PHONY : src/LightglueMatch.cpp.i
 
 src/LightglueMatch.s: src/LightglueMatch.cpp.s
@@ -193,7 +235,8 @@ src/LightglueMatch.s: src/LightglueMatch.cpp.s
 
 # target to generate assembly for a file
 src/LightglueMatch.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/src/LightglueMatch.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_Scaling.dir/build.make CMakeFiles/lightglue_Macth_Scaling.dir/src/LightglueMatch.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_main.dir/build.make CMakeFiles/lightglue_Macth_main.dir/src/LightglueMatch.cpp.s
 .PHONY : src/LightglueMatch.cpp.s
 
 src/ORB_WORKER.o: src/ORB_WORKER.cpp.o
@@ -202,7 +245,8 @@ src/ORB_WORKER.o: src/ORB_WORKER.cpp.o
 
 # target to build an object file
 src/ORB_WORKER.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/src/ORB_WORKER.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_Scaling.dir/build.make CMakeFiles/lightglue_Macth_Scaling.dir/src/ORB_WORKER.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_main.dir/build.make CMakeFiles/lightglue_Macth_main.dir/src/ORB_WORKER.cpp.o
 .PHONY : src/ORB_WORKER.cpp.o
 
 src/ORB_WORKER.i: src/ORB_WORKER.cpp.i
@@ -211,7 +255,8 @@ src/ORB_WORKER.i: src/ORB_WORKER.cpp.i
 
 # target to preprocess a source file
 src/ORB_WORKER.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/src/ORB_WORKER.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_Scaling.dir/build.make CMakeFiles/lightglue_Macth_Scaling.dir/src/ORB_WORKER.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_main.dir/build.make CMakeFiles/lightglue_Macth_main.dir/src/ORB_WORKER.cpp.i
 .PHONY : src/ORB_WORKER.cpp.i
 
 src/ORB_WORKER.s: src/ORB_WORKER.cpp.s
@@ -220,7 +265,8 @@ src/ORB_WORKER.s: src/ORB_WORKER.cpp.s
 
 # target to generate assembly for a file
 src/ORB_WORKER.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth.dir/build.make CMakeFiles/lightglue_Macth.dir/src/ORB_WORKER.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_Scaling.dir/build.make CMakeFiles/lightglue_Macth_Scaling.dir/src/ORB_WORKER.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lightglue_Macth_main.dir/build.make CMakeFiles/lightglue_Macth_main.dir/src/ORB_WORKER.cpp.s
 .PHONY : src/ORB_WORKER.cpp.s
 
 # Help Target
@@ -231,7 +277,11 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... lightglue_Macth"
+	@echo "... lightglue_Macth_Scaling"
+	@echo "... lightglue_Macth_main"
+	@echo "... Scaling.o"
+	@echo "... Scaling.i"
+	@echo "... Scaling.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
